@@ -38,6 +38,7 @@
 
 #ifndef _WIN32
 #include <netinet/tcp.h>
+#include <sys/ioctl.h>
 #endif
 
 using namespace std;
@@ -274,6 +275,23 @@ size_t Socket::SendTo(void* buf, size_t len, sockaddr_in& addr,  int flags)
 	return ret;
 }
 */
+
+/**
+ *	@brief CHecks if data is available on the socket
+ *
+ *	@return The number of bytes available or -1 on error
+ */
+int Socket::DataAvailable()
+{
+	int err;
+	int count;
+#ifdef _WIN32
+	err = ioctlsocket(m_socket, FIONREAD, &count);
+#else
+	err = ioctl(m_socket, FIONREAD, &count);
+#endif
+	return (err == 0)?count:-1;
+}
 
 /**
 	@brief Recieves data from the socket
